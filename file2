@@ -1,0 +1,2283 @@
+<?php
+#########################################################
+# Function Use : redirect() Function Used to redirect url
+#########################################################
+function redirect($URL)
+{
+  echo "<script type='text/javascript'>window.location='".$URL."'</script>";
+//	header('location:'.$URL);
+}
+function pr($arr,$end=0){
+echo "<pre>";
+print_r($arr);
+echo "</pre><hr>";
+if($end)
+	exit;
+}
+function getFormAction()
+{
+	$editFormAction = $_SERVER['PHP_SELF'];
+	if (!empty($_SERVER['QUERY_STRING']))
+	{
+	  $editFormAction .= "?" . htmlentities($_SERVER['QUERY_STRING']);
+	}
+	
+	return $editFormAction;
+}
+##################################################
+# Function Use : Display session error list
+##################################################
+/*function errorList($var,$message)
+{
+	if(empty($var))
+	{
+		$_SESSION['error'][]="Error: ".$message;
+	}	
+}*/
+
+function errorList($var,$message)
+{
+	if(empty($var))
+	{
+		$_SESSION['err'][]= $message;
+	}	
+}
+
+##################################################
+# Function Use : Display session error
+##################################################
+function showerr()
+{
+	$str = '';
+	if(!empty($_SESSION['error']))
+	{
+		$str = '<table width="100%" border="0" align="left">';
+		for($i=0; $i<count($_SESSION['error']); $i++)
+		{
+			$str .= "<tr>
+				<td class='errcls' height='20px'><img src='".ADM_IMAGES_WWW."error.gif' border='0'> ".$_SESSION['error'][$i]."</td>
+			  </tr>";
+		}
+		$str .= "</table>";
+		return $str;
+	}
+	return false;
+}
+
+##################################################
+# Function Use : Display session message
+##################################################
+function showmsg()
+{
+	$str = '';
+	if(!empty($_SESSION['msg']))
+	{
+		$str = '<table width="100%" border="0" align="left">';
+		for($i=0; $i<count($_SESSION['msg']); $i++)
+		{
+			$str .= "<tr>
+				<td class='msgcls' style='padding-left:20px' height='20px'>".$_SESSION['msg'][$i]."</td>
+			  </tr>";
+		}
+		$str .= "</table>";
+		return $str;
+	}
+	return false;
+}
+
+
+##############################################################
+# Function Use :This Function Used to valid 
+##############################################################
+function isValidEmail($email)
+{
+	if (!@eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$", $email))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isValidCapitalAlphaChar($text)
+{
+	if (!eregi("^[A-Z]", $text))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isValidAlphaChar($text)
+{
+	if (!eregi("^[A-Za-z]", $text))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isValidAlphaNumericChar($text)
+{
+	if (!eregi("^[A-Za-z0-9]", $text))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isVaildPassword($pass_text,$mini_len="6",$max_len="25")
+{
+   if (strlen($pass_text) < $mini_len || strlen($pass_text) > $max_len)
+   { 
+		$text="Password must be between ".$mini_len." to ".$max_len." character";
+   }
+   else
+   {
+	  for ($i=0 ; $i < strlen($pass_text) ; $i++) 
+	  {
+		   if(ord($pass_text[$i])=='32')
+			   $ord="improper";
+	  }
+	  if($ord=="improper")
+	  {
+			$text="Please enter password properly.";
+	  }
+   }
+   
+   return $text;
+}
+
+function isValidHttpURL($url)
+{
+	if(!preg_match('|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isValidURL($url)
+{
+	/*$regex = "((https?|ftp)\:\/\/)?"; // SCHEME
+	$regex .= "([a-zA-Z0-9+!*(),;?&=\$_.-]+(\:[a-zA-Z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
+	$regex .= "([a-zA-Z0-9-.]*)\.([a-z][A-Z]{2,3})"; // Host or IP
+	$regex .= "(\:[0-9]{2,5})?"; // Port
+	$regex .= "(\/([a-zA-Z0-9+\$_-]\.?)+)*\/?"; // Path
+	$regex .= "(\?[a-zA-Z+&\$_.-][a-zA-Z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
+	$regex .= "(#[a-zA-Z_.-][a-zA-Z0-9+\$_.-]*)?"; */
+	
+	$regex = "((https?|ftp)\:\/\/)?"; // SCHEME
+	$regex .= "([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
+	$regex .= "([a-z0-9-.]*)\.([a-z]{2,3})"; // Host or IP
+	$regex .= "(\:[0-9]{2,5})?"; // Port
+	$regex .= "(\/([a-z0-9+\$_-]\.?)+)*\/?"; // Path
+	$regex .= "(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
+	$regex .= "(#[a-z_.-][a-z0-9+\$_.-]*)?"; 
+	
+	if(!preg_match("/^$regex$/", $url))
+	{
+		return false; 
+	}
+	else
+	{
+	   return true;	
+	}
+}
+
+function isValidImage($file_name)
+{
+	$ext = strtolower(end(explode('.', $file_name)));
+	if($ext=="jpg" || $ext=="jpeg" || $ext=="gif" || $ext=="bmp" ||$ext=="png"  || $ext=="tif" || $ext=="ico")
+	{
+		return true;
+	}
+	else
+	{
+
+		return false;
+	}
+}
+
+function isValidPDF($file_name)
+{
+
+    //echo $file_name;
+    //exit;
+    $ext = strtolower(end(explode('.', $file_name)));
+	if($ext=="pdf")
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function isValidPPT($file_name)
+{
+	$ext = strtolower(end(explode('.', $file_name)));
+	if($ext=="ppt" || $ext=="pptx" )
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+##############################################################
+# Function Use : This function used to Get Post or Requesr Value
+##############################################################
+function retPostOrReq($val)
+{
+	if(!empty($_POST[$val]))
+	{
+		$retval=$_POST[$val];
+	}
+	else 
+	{
+		$retval=base64_decode($_REQUEST[$val]);
+	}
+	return $retval;
+}
+
+####################################################################
+# Function Use : This Function Used to Explode
+####################################################################
+function explodeFun($sep,$val)
+{
+	$ret=explode($sep,$val);
+	return $ret;
+}
+
+####################################################################
+# Function Use : This Function Used to Substring in forms of Words
+####################################################################
+function wordCut($text, $limit, $msg)
+{
+  if (strlen($text) > $limit)
+  {
+       $txt1 = wordwrap($text, $limit, '[cut]');
+       $txt2 = explode('[cut]', $txt1);
+       $ourTxt = $txt2[0];
+       $finalTxt = $ourTxt.$msg;
+   }
+   else
+   {
+       $finalTxt = $text;
+   }
+   return $finalTxt;
+}
+
+####################################################################
+# Function Use : This Function Used to Substring in forms of Words
+####################################################################
+function fullcharCut($mytext, $limit)
+{
+   if (strlen($mytext) > $limit)
+   {
+   		$text=chunk_split($mytext,$limit,"<br>");
+   }
+   else
+   {
+   		$text=$mytext;
+   }
+   return $text;
+}
+
+###########################################################################
+# Function Use : This Function Used to Substring in forms of Chrarcter Cut
+###########################################################################
+function charCut($mytext, $limit, $msg)
+{
+   if (strlen($mytext) > $limit)
+   {
+   		$text=chunk_split($mytext,$limit," ");
+   }
+   else
+   {
+   		$text=$mytext;
+   }
+	
+   if (strlen($text) > $limit)
+   {
+       $txt1 = wordwrap($text, $limit, '[cut]');
+	   $txt2 = explode('[cut]', $txt1);
+       $ourTxt = $txt2[0];
+       $finalTxt = $ourTxt.$msg;
+   }
+   else
+   {
+       $finalTxt = $text;
+   }
+   return $finalTxt;
+}
+
+################################################################
+# Function Use : This function used to make random code
+################################################################
+function makeCode($usrid) 
+{
+    $pars = "13579";
+    $impars = "24680";
+	
+    for ($x=0; $x < 6; $x++) 
+	{
+		mt_srand ((double) microtime() * 1000000);
+		$pars[$x] = substr($pars, mt_rand(0, strlen($pars)-1), 1);
+		$impars[$x] = substr($impars, mt_rand(0, strlen($impars)-1), 1);
+    }
+	
+    $coded =$usrid. $pars[0] . $impars[0] .$pars[2] . $pars[1] . $impars[1] . $pars[3] . $impars[3] . $pars[4];
+    
+	return($coded);
+}
+
+function dateComparison($start_date,$end_date)
+{
+	$start_date = strtotime(str_replace("-","/",$start_date));
+	$end_date = strtotime(str_replace("-","/",$end_date));
+	
+	if($start_date>$end_date)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+	
+##################################################
+# Function Use : For Count of Days
+##################################################	
+function countDays($a,$b)
+{
+   // First we need to break these dates into their constituent parts:
+   $gd_a = getdate( $a );
+   $gd_b = getdate( $b );
+   // Now recreate these timestamps, based upon noon on each day
+   // The specific time doesn't matter but it must be the same each day
+   $a_new = mktime( 12, 0, 0, $gd_a['mon'], $gd_a['mday'], $gd_a['year'] );
+   $b_new = mktime( 12, 0, 0, $gd_b['mon'], $gd_b['mday'], $gd_b['year'] );
+   // Subtract these two numbers and divide by the number of seconds in a
+   // day. Round the result since crossing over a daylight savings time
+  // barrier will cause this time to be off by an hour or two.
+   return round( abs( $a_new - $b_new ) / 86400 );
+}
+
+################################################################
+# Function Use : This Function Used to check Leap Year
+################################################################
+function isLeapYear($year)
+{
+	if ($year%4 == 0)
+	{
+		if ($year%100 == 0 && $year%400 <>0)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+##################################################
+# Function Use : For Count of Total Days
+##################################################
+function totalDays($month,$year)
+{
+	$days = array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
+	if ($month==2 && isLeapYear($year))
+	{
+		return 29;
+	}
+	else 
+	{
+		return $days[$month-1];
+	}
+}
+
+function dateDiffGregorian($dformat, $endDate, $beginDate)
+{
+    $date_parts1=explode($dformat, $beginDate);
+    $date_parts2=explode($dformat, $endDate);
+    $start_date=gregoriantojd($date_parts1[0], $date_parts1[1], $date_parts1[2]);
+    $end_date=gregoriantojd($date_parts2[0], $date_parts2[1], $date_parts2[2]);
+    return $end_date - $start_date;
+}
+
+function dateDiff($start_date,$end_date)
+{
+	 $s=strtotime($end_date) - strtotime($start_date);
+	 $m=intval($s/60);
+	 $s=$s%60;
+	 $h=intval($m/60);
+	 $m=$m%60;
+	 $d=intval($h/24);
+	 $h=$h%24;
+	 
+	 return  trim($d);
+}
+
+function dateDiffTime($date1,$date2)
+{
+	$s=strtotime($date2) - strtotime($date1);
+	$m=intval($s/60);
+	$s=$s%60;
+	$h=intval($m/60);
+	$m=$m%60;
+	$d=intval($h/24);
+	$h=$h%24;
+	return trim($d)." day ".trim($h)." hours and ".trim($m)." minutes ago.";
+}
+
+function getTimeDifference( $start, $end )
+{
+	$uts['start']      =    strtotime( $start );
+    $uts['end']        =    strtotime( $end );
+		  
+    if( $uts['start']!==-1 && $uts['end']!==-1 )
+    {
+        if( $uts['end'] >= $uts['start'] )
+        {
+            $diff    =    $uts['end'] - $uts['start'];
+            if( $days=intval((floor($diff/86400))) )
+                $diff = $diff % 86400;
+            if( $hours=intval((floor($diff/3600))) )
+                $diff = $diff % 3600;
+            if( $minutes=intval((floor($diff/60))) )
+                $diff = $diff % 60;
+            $diff    =    intval( $diff );            
+            return( array('days'=>$days, 'hours'=>$hours, 'minutes'=>$minutes, 'seconds'=>$diff) );
+        }
+        else
+        {
+            //trigger_error( "Ending date/time is earlier than the start date/time", E_USER_WARNING );
+		}
+    }
+    else
+    {
+        //trigger_error( "Invalid date/time data detected", E_USER_WARNING );
+    }
+    return false;
+}
+
+function dispayEndDatetime($datetime_diff,$convert)
+{
+	$limit0="0";
+	$limit3="3";
+	
+	$days=$datetime_diff['days'];
+	$hours=$datetime_diff['hours'];
+	$minutes=$datetime_diff['minutes'];
+	
+	if($limit3<=$days)
+	{
+		$datetime=strftime("%B %d, %Y", strtotime($convert));
+	}
+	else if(($limit0<$days) && ($days<$limit3))
+	{
+		/*$datetime=$days." days, ".$hours." hours and ".$minutes." minutes";*/
+		$datetime=$days." d, ".$hours." h and ".$minutes." m";
+	}
+	else 
+	{
+		if($hours!=$limit0 && $minutes!=$limit0)
+		{
+			/*$datetime=$hours." hours and ".$minutes." minutes";*/
+			$datetime=$hours." h and ".$minutes." m";
+		}
+		else if($datetime_diff[hours]==$limit0 && $datetime_diff[minutes]!=$limit0)
+		{
+			/*$datetime=$minutes." minutes";*/
+			$datetime=$minutes." m";
+		}
+	}
+	
+	return $datetime;
+}
+
+function timeConvert($time,$type)
+{
+  $time_hour=substr($time,0,2);
+  $time_minute=substr($time,3,2);
+  $time_seconds=substr($time,6,2);
+  
+  if($type == 1):
+  	// 12 Hour Format with uppercase AM-PM
+  	$time=date("g:i A", mktime($time_hour,$time_minute,$time_seconds));
+  elseif($type == 2):
+  	// 12 Hour Format with lowercase am-pm
+  	$time=date("g:i a", mktime($time_hour,$time_minute,$time_seconds)); 
+  elseif($type == 3):
+  	// 24 Hour Format
+  	$time=date("H:i", mktime($time_hour,$time_minute,$time_seconds)); 
+  elseif($type == 4):
+  	// Swatch Internet time 000 through 999
+  	$time=date("B", mktime($time_hour,$time_minute,$time_seconds)); 
+  elseif($type == 5):
+  	// 9:30:23 PM
+  	$time=date("g:i:s A", mktime($time_hour,$time_minute,$time_seconds));
+  elseif($type == 6):
+  	// 9:30 PM with timezone, EX: EST, MDT
+  	$time=date("g:i A T", mktime($time_hour,$time_minute,$time_seconds));
+  elseif($type == 7):
+  	// Different to Greenwich(GMT) time in hours
+  	$time=date("O", mktime($time_hour,$time_minute,$time_seconds)); 
+  endif;
+  return $time;
+};
+
+
+function humanToUnix($datestr = '')
+{
+    if ($datestr == '')
+    {
+        return FALSE;
+    }
+    
+    $datestr = trim($datestr);
+    $datestr = preg_replace("/\040+/", "\040", $datestr);
+
+    if ( ! ereg("^[0-9]{2,4}\-[0-9]{1,2}\-[0-9]{1,2}\040[0-9]{1,2}:[0-9]{1,2}.*$", $datestr))
+    {
+        return FALSE;
+    }
+
+    $split = preg_split("/\040/", $datestr);
+
+    $ex = explode("-", $split['0']);            
+    
+    $year  = (strlen($ex['0']) == 2) ? '20'.$ex['0'] : $ex['0'];
+    $month = (strlen($ex['1']) == 1) ? '0'.$ex['1']  : $ex['1'];
+    $day   = (strlen($ex['2']) == 1) ? '0'.$ex['2']  : $ex['2'];
+
+    $ex = explode(":", $split['1']); 
+    
+    $hour = (strlen($ex['0']) == 1) ? '0'.$ex['0'] : $ex['0'];
+    $min  = (strlen($ex['1']) == 1) ? '0'.$ex['1'] : $ex['1'];
+
+    if (isset($ex['2']) AND ereg("[0-9]{1,2}", $ex['2']))
+    {
+        $sec  = (strlen($ex['2']) == 1) ? '0'.$ex['2'] : $ex['2'];
+    }
+    else
+    {
+        // Unless specified, seconds get set to zero.
+        $sec = '00';
+    }
+    
+    if (isset($split['2']))
+    {
+        $ampm = strtolower($split['2']);
+      
+        if (substr($ampm, 0, 1) == 'p' AND $hour < 12)
+            $hour = $hour + 12;
+            
+        if (substr($ampm, 0, 1) == 'a' AND $hour == 12)
+            $hour =  '00';
+            
+        if (strlen($hour) == 1)
+            $hour = '0'.$hour;
+    }
+            
+    return mktime($hour, $min, $sec, $month, $day, $year);
+}  
+
+####################################################################
+# Function Use : This Function Used For Paging
+####################################################################
+
+function frontPaging($pageNumber,$numofrows,$rowsPerPage,$selfurl)
+{
+	$numrows = $numofrows;
+					
+	// how many pages we have when using paging?
+	$maxPage = ceil($numrows/$rowsPerPage);
+	
+	if ($pageNumber > 1)
+	{
+		$page = $pageNumber - 1;
+		
+		$prev = " <a href=\"$selfurl&page=$page\" class=\"password\"><img src=\"".PAGING_IMAGE."/prev.png\" border=\"0\"></a> ";
+		$first = " <a href=\"$selfurl&page=1\" class=\"password\"><img src=\"".PAGING_IMAGE."/first.png\" border=\"0\"></a> ";
+	} 
+	else
+	{
+		$prev  = " <img src=\"".PAGING_IMAGE."/next_gray.png\" border=\"0\"> "; // we're on page one, don't enable 'previous' link
+		$first = " <img src=\"".PAGING_IMAGE."/first_gray.png\" border=\"0\"> "; // nor 'first page' link
+	}
+	
+	// print 'next' link only if we're not
+	// on the last page
+	if ($pageNumber < $maxPage)
+	{
+		$page = $pageNumber + 1;
+		
+		$next = " <a href=\"$selfurl&page=$page\" class=\"password\"><img src=\"".PAGING_IMAGE."/next.png\" border=\"0\"></a> ";
+		$last = " <a href=\"$selfurl&page=$maxPage\" class=\"password\"><img src=\"".PAGING_IMAGE."/last.png\" border=\"0\"></a>";
+	} 
+	else
+	{
+		$next = " <img src=\"".PAGING_IMAGE."/prev_gray.png\" border=\"0\"> "; // we're on the last page, don't enable 'next' link
+		$last = " <img src=\"".PAGING_IMAGE."/last_gray.png\" border=\"0\"> " ; // nor 'last page' link
+	}
+	
+	if($maxPage != 1 && $maxPage != 0)
+	{
+	   echo '<table>';
+			echo '<tr><td colspan=3 height="5px"></td></tr>';
+			echo '<tr>';
+				echo '<td align="right" class="browsedcontent" valign="top">'. $first . "<span>" . $prev . "</span></td>" ;
+				echo '<td align="right" class="browsedcontent" valign="top" style="padding-top:2px;" >Showing page <strong>'.$pageNumber.'</strong> of <strong>'.$maxPage.'</strong> pages ';
+				echo '<td align="right" class="browsedcontent" valign="top"> <span>' . $next . '</span>' . $last."</td>";
+			echo '</tr>';
+			echo '<tr><td colspan=3 height="5px"></td></tr>';
+		echo '</table>';
+	}	
+}
+
+
+####################################################################
+# Function Use : This Function Used For Paging for Admin side
+####################################################################
+
+function adminPaging($pageNumber,$numofrows,$rowsPerPage,$selfurl)
+{
+	// how many rows we have in database
+	$numrows = $numofrows;
+					
+	// how many pages we have when using paging?
+	$maxPage = ceil($numrows/$rowsPerPage);
+	
+		
+	if ($pageNumber > 1)
+	{
+		$page = $pageNumber - 1;
+		
+		$prev = " <a href=\"$selfurl&page=$page\" class=\"editlink\"><img src=\"".PAGING_IMAGE."/prev.png\" border=\"0\"></a> ";
+		$first = " <a href=\"$selfurl&page=1\" class=\"editlink\"><img src=\"".PAGING_IMAGE."/first.png\" border=\"0\"></a> ";
+	} 
+	else
+	{
+		$prev  = " <img src=\"".PAGING_IMAGE."/next_gray.png\" border=\"0\"> "; // we're on page one, don't enable 'previous' link
+		$first = " <img src=\"".PAGING_IMAGE."/first_gray.png\" border=\"0\"> "; // nor 'first page' link
+	}
+	
+	// print 'next' link only if we're not
+	// on the last page
+	if ($pageNumber < $maxPage)
+	{
+		$page = $pageNumber + 1;
+		
+		$next = " <a href=\"$selfurl&page=$page\" class=\"editlink\"><img src=\"".PAGING_IMAGE."/next.png\" border=\"0\"></a> ";
+		$last = " <a href=\"$selfurl&page=$maxPage\" class=\"editlink\"><img src=\"".PAGING_IMAGE."/last.png\" border=\"0\"></a>";
+	} 
+	else
+	{
+		$next = " <img src=\"".PAGING_IMAGE."/prev_gray.png\" border=\"0\"> "; // we're on the last page, don't enable 'next' link
+		$last = " <img src=\"".PAGING_IMAGE."/last_gray.png\" border=\"0\"> "; // nor 'last page' link
+	}
+	
+	if($maxPage != 1 && $maxPage != 0)
+	{
+		echo '<table>';
+			echo '<tr><td colspan=3 height="5px"></td></tr>';
+			echo '<tr>';
+				echo '<td align="right" class="browsedcontent" valign="top">'. $first . "<span>" . $prev . "</span></td>" ;
+				echo '<td align="right" class="browsedcontent" valign="top" style="padding-top:2px;" >Showing page <strong>'.$pageNumber.'</strong> of <strong>'.$maxPage.'</strong> pages ';
+				echo '<td align="right" class="browsedcontent" valign="top"> <span>' . $next . '</span>' . $last."</td>";
+			echo '</tr>';
+			echo '<tr><td colspan=3 height="5px"></td></tr>';
+		echo '</table>';
+	}
+}
+
+################################################################
+# Function Use : This function used to send mail attachment
+################################################################
+function mailAttachment($filename, $path, $mailto, $from_mail, $from_name, $replyto, $subject, $message) 
+{
+   	$file = $path.$filename;
+    $file_size = @filesize($file);
+    $handle = @fopen($file, "r");
+    $content = @fread($handle, $file_size);
+    @fclose($handle);
+    $content = chunk_split(base64_encode($content));
+    $uid = md5(uniqid(time()));
+    $name = basename($file);
+    $header = "CC: <".$from_mail.">\r\n";
+    $header .= "Reply-To: ".$replyto."\r\n";
+    $header .= "MIME-Version: 1.0\r\n";
+    $header .= "Content-Type: multipart/mixed; boundary=\"".$uid."\"\r\n\r\n";
+    $header .= "This is a multi-part message in MIME format.\r\n";
+    $header .= "--".$uid."\r\n";
+    $header .= "Content-type:text/html; charset=iso-8859-1\r\n";
+    $header .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
+    $header .= $message."\r\n\r\n";
+    $header .= "--".$uid."\r\n";
+    $header .= "Content-Type: application/octet-stream; name=\"".$filename."\"\r\n"; // use diff. tyoes here 
+    $header .= "Content-Transfer-Encoding: base64\r\n";
+    $header .= "Content-Disposition: attachment; filename=\"".$filename."\"\r\n\r\n";
+    $header .= $content."\r\n\r\n";
+    $header .= "--".$uid."--";
+	
+    if (@mail($mailto, $subject, "", $header)) 
+	{
+		return true;
+    } 
+	else 
+	{
+		return false;
+     }
+}
+
+
+#########################################################
+# Function Use : This Function Used to read File
+#########################################################
+function readValidFile($dirname)
+{
+	$retval = '';
+	
+	if(!is_dir($dirname))
+	{
+		mkdir($dirname);
+	}
+	if ($dir = @opendir($dirname)) 
+	{
+		while (($file = readdir($dir)) !== false) 
+		{
+			if($file!="." && $file!="..")
+			{
+				if(substr_count($file,".jpg")>0)
+				{
+					return 	$file;	
+				}
+				if(substr_count($file,".jpeg")>0)
+				{
+					return 	$file;	
+				}
+			}
+		}
+	}
+}
+
+
+#########################################################
+# Function Use : fileUpload() Function Used to upload files
+#########################################################
+function get_ext($filename)	{
+$photo_ext	= explode(".", $filename);
+return strtolower($photo_ext[sizeof($photo_ext) - 1]);
+
+}
+
+function fileUpload($tempname,$updfile,$filename)
+{
+  /*echo  $tempname."--".$updfile."-".$filename;
+  exit*/
+	if(move_uploaded_file($tempname,$updfile.$filename))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}	
+}
+
+##################################################
+# Function Use : This Function Used to resize and upload images Passing the array
+##################################################
+
+function oneImageResizeUpload($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = @round($width / $ratio2);
+			$newh2 = @round($height / $ratio2);
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+				$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				$numefisier=$new_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+
+function oneImageResizeUpload2($tt="",$updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+		
+	for($i=0;$i<count($image)-1;$i++)
+	{	
+	$imgname=$image['name'][$tt];
+	$imgsize=$image['size'][$tt];	
+	$imgtmpname=$image['tmp_name'][$tt];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+			$neww2 = @round($width / $ratio2);
+			$newh2 = @round($height / $ratio2);
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+				$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				$numefisier=$new_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}
+	}//if file size>0
+	return $numefisier;
+}
+
+function imgthumbpng($imgarray,$imagename,$h,$w){
+   
+    $imgname = explode(".",$imgarray['name']);
+                    
+    list($width, $height, $type, $attr) = @getimagesize($imgarray['tmp_name']);
+
+    $w1=($width>$w) ? $w : $width;
+    $h1=($height>$h) ? $h : $height;
+	
+    
+	 
+    $newh1=$h1;
+    $neww1=$w1;
+	
+    
+	
+            if($imgarray['size']>300000000)
+            {                                    
+                 $stop=_MAPER;
+                 $ero=1;
+				 return 0;
+            }
+            else
+            {
+                 
+				  /*if($width>=$height)
+                    {
+                        $ratio1 = @($width / $neww1);
+                        $newh1 = @round($height / $ratio1);
+                        
+                        
+                    }
+                    else
+                    {
+						$ratio1 = @($height / $newh1);
+                        $neww1 = @round($width / $ratio1);
+                       
+						
+                    }*/
+                    
+                    if(($type==1) || ($type==2) || ($type==6) || ($type == 3))
+                    { 
+                            if($type==1)
+                            {
+							
+                                    $srcImg = imagecreatefromgif($imgarray['tmp_name']);
+                                    $scale1=1.2;
+                                    $scale2=3;
+                                    $dstImg1 = @imagecreatetruecolor($neww1, $newh1);
+                                    /*$dstImg2 = imagecreatetruecolor($neww2, $newh2);    
+									$dstImg3 = imagecreatetruecolor($neww3, $newh3);   
+									$dstImg4 = imagecreatetruecolor($neww4, $newh4); */   
+                                    imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+                                    /*imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+									imagecopyresampled($dstImg3, $srcImg, 0, 0, 0, 0,$neww3, $newh3,$width, $height);
+									imagecopyresampled($dstImg4, $srcImg, 0, 0, 0, 0,$neww4, $newh4,$width, $height);*/
+                                    $nume=$imgname[0];
+                                    $nume2=$nume;
+
+                                    
+									
+									imagejpeg($dstImg1,$imagename); 
+                                    
+                                    //  imagedestroy($srcImg);
+                                    imagedestroy($dstImg1);
+                                    /*imagedestroy($dstImg2);
+									imagedestroy($dstImg3);
+									imagedestroy($dstImg4);*/
+                                     $numefisier[$i]=$nume.".gif";
+                                     $path = $uploaddir.$numefisier[$i];
+                            }
+                            if($type==2 || ($type==6))
+                            {      
+                                    $srcImg = imagecreatefromjpeg($imgarray['tmp_name']);
+                                   
+								   							   
+                                    $scale1=1.2;
+                                    $scale2=3;
+                                    $dstImg1 = @imagecreatetruecolor($neww1, $newh1);
+                                    /*$dstImg2 = imagecreatetruecolor($neww2, $newh2); 
+									 $dstImg3 = imagecreatetruecolor($neww3, $newh3);
+									 $dstImg4 = imagecreatetruecolor($neww4, $newh4); */                                         
+									
+									imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+                                    /*imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+									imagecopyresampled($dstImg3, $srcImg, 0, 0, 0, 0,$neww3, $newh3,$width, $height);
+									imagecopyresampled($dstImg4, $srcImg, 0, 0, 0, 0,$neww4, $newh4,$width, $height);*/
+									
+                                    $nume=$imgname[0];
+									$nume2=$nume;
+                                    //imagejpeg($dstImg1,$updir.$nume.".jpg");
+									
+
+					
+					
+					
+                                    imagejpeg($dstImg1,$imagename); 
+
+                                    imagedestroy($srcImg);
+                                    imagedestroy($dstImg1);
+
+                                    $numefisier[$i]=$nume.".jpg";
+									
+									
+                                    $path = $uploaddir.$numefisier[$i];
+					
+									
+                            }
+							
+							if($type==3) { $img_name = explode(".",$imagename);
+							
+							
+                               	$srcImg = imagecreatefrompng($imgarray['tmp_name']);
+								
+								
+                                    $scale1=1.2;
+                                    $scale2=3;
+                                    $dstImg1 = @imagecreatetruecolor($neww1, $newh1);
+                                    /*$dstImg2 = imagecreatetruecolor($neww2, $newh2);    
+									$dstImg3 = imagecreatetruecolor($neww3, $newh3);   
+									$dstImg4 = imagecreatetruecolor($neww4, $newh4);    */
+									
+									
+									imagealphablending($dstImg1, false);
+								
+							    imagesavealpha($dstImg1,true);
+								
+								
+							    $transparent = imagecolorallocatealpha($dstImg1, 255, 255, 255, 127);
+							
+							    imagefilledrectangle($dstImg1, 0, 0, $neww1, $newh1, $transparent);
+								
+								//by nisha - png transparent background 
+								imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+							//		
+                                    imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+									
+                                    $nume=$imgname[0];
+                                    $nume2=$nume;
+
+                                    
+									
+									imagepng($dstImg1,$imagename); 
+									//imagepng(imagecreatefrompng("./img/".$slide_game['nameid'].".png"),"./img/".$slide_game['nameid'].".jpg");
+									
+									$img_name = explode(".",$imagename);
+									imagejpeg(imagecreatefrompng($imagename),$img_name[0].".jpg");
+                                    unlink($imagename);
+                                   // imagedestroy($srcImg);
+                                    imagedestroy($dstImg1);
+                                    /*imagedestroy($dstImg2);
+									imagedestroy($dstImg3);
+									imagedestroy($dstImg4);*/
+                                     $numefisier[$i]=$nume.".png";
+                                     $path = $uploaddir.$numefisier[$i];
+                            }
+							return 1;
+                    }
+                    else
+                    {
+                    $stop="invalid file format!";
+                    $ero=1;
+					return 0;
+                    }
+            }//if file size > 300000
+    } 
+
+#################################################################
+### Function Use : This function Used to create the status Combo.
+#################################################################
+
+function getDynamicCombo($name,$array,$key,$value,$selected,$style,$selectone,$value2="")
+{
+	$cmbstring="<SELECT name='".$name."' class = '".$style."' disabled=disabled>";
+	if($selectone=='1')
+	{
+		$cmbstring.="<option value='' >Select One...</option> ";
+	}
+	for($i=0;$i<count($array);$i++)
+	{
+		if($selected==$array[$i][$key])
+		{
+			if(!empty($value2))
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' selected>(".$array[$i][$value].") - ".$array[$i][$value2]."</OPTION>" ;	
+			}
+			else
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' selected>".$array[$i][$value]."</OPTION>" ;
+			}
+		}
+		else
+		{
+			if(!empty($value2))
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' >(".$array[$i][$value].") - ".$array[$i][$value2]."</OPTION>" ;	
+			}else{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' >".$array[$i][$value]."</OPTION>" ;
+			}
+
+		}
+	}
+	echo $cmbstring.="</SELECT>";
+}
+
+
+function getDynamicGroupCombo($name,$array,$key,$value,$selected,$style="",$selectone="",$value2="",$selectall="")
+{
+	$cmbstring="<SELECT name='".$name."' ".$style.">";
+	if($selectone=='1')
+	{
+		$cmbstring.="<option value='' >Select One...</option> ";
+	}
+	for($i=0;$i<count($array);$i++)
+	{
+		if($selected==$array[$i][$key])
+		{
+			if(!empty($value2))
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' selected>(".$array[$i][$value].") - ".$array[$i][$value2]."</OPTION>" ;	
+			}
+			else
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' selected>".$array[$i][$value]."</OPTION>" ;
+			}
+		}
+		else
+		{
+			if(!empty($value2))
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' >(".$array[$i][$value].") - ".$array[$i][$value2]."</OPTION>" ;	
+			}
+			else
+			{
+				$cmbstring.="<OPTION value='".$array[$i][$key]."' >".$array[$i][$value]."</OPTION>" ;
+			}
+
+		}
+	}
+	if($selectall=='1')
+	{
+		if($selected=="View all")
+		{
+			$cmbstring.="<option value='View all' selected >View all</option> ";
+		}
+		else 
+		{
+			$cmbstring.="<option value='View all' >View all</option> ";
+		}
+	}
+	echo $cmbstring.="</SELECT>";
+}
+
+function getDynamicStatusCombo($name,$selected,$style="",$selectone="")
+{
+	$cmbstring="<SELECT name='".$name."' ".$style.">";
+	if($selected=="Active")
+		$cmbstring.="<option value='Active' id='Active' selected>Active</option>";
+	else 
+		$cmbstring.="<option value='Active' id='Active'>Active</option>";
+
+	if($selected=="Inactive")
+		$cmbstring.="<option value='Inactive' id='Inactive' selected>Inactive</option>";
+	else 
+		$cmbstring.="<option value='Inactive' id='Inactive'>Inactive</option>";
+
+	echo $cmbstring.="</SELECT>";
+}
+
+##################################################
+# Function Use : This function used to Create the Page size
+##################################################
+
+function pageSizeCombo($name,$selected,$style='')
+{
+	$cob.="	<select name='".$name."' ".$style.">";
+	
+	if($selected==5)
+		$cob.=	"<option value='5' selected>5 / pg</option>";
+	else
+		$cob.=	"<option value='5'>5 / pg</option>";
+
+	if($selected==10)
+		$cob.=	"<option value='10' selected>10 / pg</option>";
+	else
+		$cob.=	"<option value='10'>10 / pg</option>";
+
+	if($selected==25)
+		$cob.=	"<option value='25' selected>25 / pg</option>";
+	else
+		$cob.=	"<option value='25'>25 / pg</option>";
+
+	if($selected==50)
+		$cob.=	"<option value='50' selected>50 / pg</option>";
+	else
+		$cob.=	"<option value='50'>50 / pg</option>";
+		
+	if($selected=='0')
+		$cob.=	"<option value='0' selected>View all</option>";
+	else
+		$cob.=	"<option value='0'>View all</option>";
+
+		$cob.=	"</select>";
+	return $cob;
+}
+
+function getPrefixCombo($select_name,$select_id,$selected_prefix="",$style="",$extra="")
+{
+	$cmbstring="";
+	
+	$cmbstring.="<select name='".$select_name."' id='".$select_id."' ".$style." ".$extra.">";
+	
+	if($selected_prefix=='Ms.')
+	{
+		$cmbstring.="<option value='Ms.' Selected>Ms.</option>";
+	}
+	else
+	{
+		$cmbstring.="<option value='Ms.'>Ms.</option>";
+	}
+	
+	if($selected_prefix=='Mr.')
+	{
+		$cmbstring.="<option value='Mr.' Selected>Mr.</option>";
+	}
+	else
+	{
+		$cmbstring.="<option value='Mr.'>Mr.</option>";
+	}
+	
+	if($selected_prefix=='Mrs.')
+	{
+		$cmbstring.="<option value='Mrs.' Selected>Mrs.</option>";
+	}
+	else
+	{
+		$cmbstring.="<option value='Mrs.'>Mrs.</option>";
+	}
+	
+	if($selected_prefix=='Miss')
+	{
+		$cmbstring.="<option value='Miss' Selected>Miss</option>";
+	}
+	else
+	{
+		$cmbstring.="<option value='Miss'>Miss</option>";
+	}
+	
+	$cmbstring.="</select>";
+	
+	return $cmbstring;
+}
+
+function username_password($len)
+{
+$value='';
+$chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+$length = $len;
+
+$max_i = strlen($chars)-1;
+$value = '';
+	for ($i=0;$i<$length;$i++)
+	{
+	$value .= $chars{mt_rand(0,$max_i)};
+	}
+
+return $value;
+
+}
+function oneImageResizeUploadbg($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 2200;
+			$newh2 = 495; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+function oneImageResizeUploadubg($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 2200;
+			$newh2 = 463; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+function oneImageResizeUploadbottombg($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 2200;
+			$newh2 = 288; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+function oneImageResizeUploadfooterbg($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 1;
+			$newh2 = 44; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+function oneImageResizeUploadnews($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 300;
+			$newh2 = 200; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+
+function oneImageResizeUploadubanner($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 999;
+			$newh2 = 251; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+
+function oneImageResizeUploadfavicon($updir,$image,$new_name="",$org_prefix="org_",$th_prefix="",$th_size='256',$reqWidth='900',$reqHeight='450')
+{
+	//$reqWidth='900';
+	//$reqHeight='450';
+	//$th_size='120';
+	
+	
+	
+	$imgname=$image['name'];
+	$imgsize=$image['size'];	
+	$imgtmpname=$image['tmp_name'];
+	
+	if($imgsize>0)
+	{
+		list($width, $height, $type, $attr) = getimagesize($imgtmpname);
+		
+		$neww1=($width>$reqWidth) ? $reqWidth : $width;			
+		$newh1=($height>$reqHeight) ? $reqHeight : $height;
+		
+		$neww2=($width>$th_size) ? $th_size : $width;
+		$newh2=($height>$th_size) ? $th_size : $height;	
+				
+		if($imgsize>300000000)
+		{
+			$stop=_MAPER;
+			$ero=1;
+			return 1;
+		}
+		else
+		{
+			#########################################################################
+			$ratio1 = max(($height / $newh1),($width / $neww1));
+			$newh1 = @round($height / $ratio1);
+			$neww1 = @round($width / $ratio1);
+			
+			if($width>$height)
+			{								
+				$ratio2 = max(($height / $newh2),($width / $neww2));
+			}
+			else if($width==$height)
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($height / $newh1);
+				}
+			}
+			else
+			{
+				$ratio2 = @($height / $newh2);
+				if($ratio1==1)
+				{	
+					$ratio1 = @($width / $neww1);
+				}
+			} 
+			
+		 	$neww2 = 16;
+			$newh2 = 16; 
+			#########################################################################
+			
+			if(($type==1) || ($type==2) || ($type==3))
+			{ 
+				#########################################################################
+				if($type==1)
+				{
+					$srcImg = imagecreatefromgif($imgtmpname);
+					$typeImg=".gif";
+				}	
+				if($type==2) 
+				{
+					$srcImg = imagecreatefromjpeg($imgtmpname); 
+					$typeImg=".jpg";
+				}
+				if($type==3) 
+				{
+					$srcImg = imagecreatefrompng($imgtmpname);
+					$typeImg=".png";
+				}
+				#########################################################################
+				$dstImg1 = imagecreatetruecolor($neww1, $newh1);
+				$dstImg2 = imagecreatetruecolor($neww2, $newh2);
+				imagecopyresampled($dstImg1, $srcImg, 0, 0, 0, 0,$neww1, $newh1, $width,$height);
+				imagecopyresampled($dstImg2, $srcImg, 0, 0, 0, 0,$neww2, $newh2,$width, $height);
+				if(empty($new_name))
+				{
+					$new_name=makecode(1);
+				}
+				$_SESSION['number']['formate'] = $new_name;
+				
+				$org_name=$org_prefix.$new_name;
+			 	$th_name=$th_prefix.$new_name;
+				#########################################################################	
+				if($type==1 || $type==2)
+				{	
+					imagejpeg($dstImg1,$updir.$org_name.$typeImg);
+					imagejpeg($dstImg2,$updir.$th_name.$typeImg);
+				}
+				if($type==3) 
+				{
+					imagepng($dstImg1,$updir.$org_name.$typeImg);
+					imagepng($dstImg2,$updir.$th_name.$typeImg);
+				}		
+				#########################################################################
+				imagedestroy($srcImg);
+				imagedestroy($dstImg1);
+				imagedestroy($dstImg2);
+				
+				/*$numefisier=$org_name.$typeImg;*/
+				 $numefisier=$th_name.$typeImg;
+				#########################################################################
+			}
+			else
+			{
+				$stop="invalid file format!";
+				$ero=1;
+				return 1;
+			}
+	    }
+	}//if file size>0
+	return $numefisier;
+}
+
+
+
+?>
