@@ -1,0 +1,1745 @@
+<?php
+################################################################################################################################
+function isAdminMember()
+{
+	if(empty($_SESSION['admin_id']))
+	{
+		$URL=ADM_FOLDER_WWW.ADM_LOGIN;
+		redirect($URL);
+		exit;
+	}
+}
+
+function isSetProject()
+{
+	if(empty($_SESSION["pro_id1"]))
+	{
+		$URL=FRT_FOLDER_WWW.FRT_PROJECTEN;
+		redirect($URL);
+		exit;
+	}
+}
+
+function chkSessionVar($session)
+{
+	if(!empty($session))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function valid_user()
+{
+	global $db;
+	
+	if(empty($_SESSION['adm_username']))
+	{
+		return 0;
+	}
+	elseif(empty($_SESSION['adm_password']))
+	{
+		return 0;
+	}
+	elseif(empty($_SESSION['adm_id']))
+	{
+		return 0;
+	}
+	else
+	{
+	   	$adm_username = $_SESSION['adm_username'];
+		$adm_password = $_SESSION['adm_password'];
+		$adm_id = $_SESSION['adm_id'];
+				
+		$data = $db->select("SELECT * FROM ".TBL_ADMIN_USER." WHERE adm_username='".$adm_username."' and adm_password='".$adm_password."' ");
+		if(count($data)==0)
+		{
+			return 0;
+		}
+		else
+		{
+			if( !($adm_id == $data[0]['adm_id']))
+			{
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getAdminSessionId()
+{
+	return $_SESSION['admin_id'];
+}
+function setSession($url)
+{
+   
+	$expl_url = explode("/",$url);
+	foreach($expl_url as $key => $value)
+	{
+		if($value == FRT_ENGLISH_SESSION)
+		{
+			 $lan_prefix = FRT_ENGLISH_PREFIX;	
+		}
+		if($value == FRT_FRENCH_SESSION)
+		{
+			 $lan_prefix = FRT_FRENCH_PREFIX;	
+		}
+		if($value == FRT_DUTCH_SESSION)
+		{
+			$lan_prefix = FRT_DUTCH_PREFIX;	
+		}			
+	}
+	return $lan_prefix;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getFrontFileMetaKey($filename,$field_prefix)
+{
+	if(!empty($filename))
+	{
+		$file = explode(".",$filename);	
+				
+		$file_meta_key = FRT_META_KEY_.strtoupper($file[0]);
+		
+		if(defined($file_meta_key))	
+		{
+			$display_meta_key=constant($file_meta_key);
+		}
+		else 
+		{
+			$display_meta_key=FRT_DEFAULT_META_KEY;
+		}	
+	}
+	else
+	{
+		$display_meta_key=FRT_DEFAULT_META_KEY;
+	}
+	
+	return $display_meta_key;
+}
+
+function getFrontFileMetaDesc($filename,$field_prefix)
+{
+	if(!empty($filename))
+	{
+		$file = explode(".",$filename);	
+				
+		$file_meta_desc = FRT_META_DESC_.strtoupper($file[0]);
+		
+		if(defined($file_meta_desc))	
+		{
+			$display_meta_desc=constant($file_meta_desc);
+		}
+		else 
+		{
+			$display_meta_desc=FRT_DEFAULT_META_DESC;
+		}	
+	}
+	else
+	{
+		$display_meta_desc=FRT_DEFAULT_META_DESC;
+	}
+	
+	return $display_meta_desc;
+}
+
+function getFrontFileTitle($filename,$field_prefix)
+{
+	if(!empty($filename))
+	{
+		$file = explode(".",$filename);	
+				
+		$file_title = FRT_TITLE_.strtoupper($file[0]);
+		
+		if(defined($file_title))	
+		{
+			$display_file_title=constant($file_title);
+			$display_title=FRT_DEFAULT_TITLE." - ".$display_file_title;
+		}
+		else 
+		{
+			$display_title=FRT_DEFAULT_TITLE;
+		}	
+	}
+	else
+	{
+		$display_title=FRT_DEFAULT_TITLE;
+	}
+	
+	return $display_title;
+}
+
+function getAdminFileTitle($filename)
+{
+	
+	if(!empty($filename))
+	{
+		$file = explode(".",$filename);	
+		//echo SITE_NAME." &raquo; ".constant(FILE_TITLE_.strtoupper($file[0]));
+		
+		$file_title = FILE_TITLE_.strtoupper($file[0]);
+		//echo $file_title;
+		//exit;
+		if(defined($file_title))	
+		{
+			$display_file_title=constant($file_title);
+			$display_title=$display_file_title;
+		}
+		else 
+		{
+			$display_title=ADM_DEFAULT_PAGE_TITLE;
+		}
+	}
+	else
+	{
+		$display_title=ADM_DEFAULT_PAGE_TITLE;
+	}
+	
+	return $display_title;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getTextArea($field_name='',$field_id='',$field_value='',$rows='3',$cols='53')
+{
+	$tinymce = '<textarea name="'.$field_name.'" id="'.$field_id.'" rows="'.$rows.'" cols="'.$cols.'">'.$field_value.'</textarea>';
+	
+	return $tinymce;
+}
+
+function getFCKeditorSource($field_name,$field_value="")
+{ 
+	if(file_exists(FCK_EDITOR_DIR."fckeditor.php"))
+	{
+		require_once(FCK_EDITOR_DIR."fckeditor.php");
+		
+		$oFCKeditor = new FCKeditor($field_name);
+		$oFCKeditor->BasePath = FCK_EDITOR_WWW;						
+		$oFCKeditor->Config['SkinPath'] = FCK_EDITOR_SKINS;		
+		$oFCKeditor->Value = stripslashes($field_value);
+		$oFCKeditor->ToolbarSet	= 'Default' ;
+		$oFCKeditor->Width	= 560;
+		$oFCKeditor->Height	= 300;
+		$oFCKeditor->Create();
+	}
+	else
+	{
+	?>
+		<textarea rows="3" cols="53" name="<?=$field_name?>"><?php echo stripslashes($field_value); ?></textarea>
+	<?php
+	}									 
+}
+
+function getTinyMCE($name="",$value="")
+{
+	$tiny_mce = '<textarea name="'.$name.'" style="width:100%" class="myBasicEditor" >'.$value.'</textarea>';
+	return $tiny_mce;
+}
+
+
+function pagingPageNumber($filename,$pages,$page)
+{
+	if($pages>1)
+	{
+		$location=$filename."&page=";		
+		echo '<tr>';
+			echo '<td align="right" valign="top">';
+				echo '<b>Pages:<b>&nbsp;';
+				echo "<select name='page_cmd' id='page_cmd' class='page_cmd' onchange='window.location=\"".$location."\"+this.value'>";
+				for($t=1; $t<=$pages; $t++)
+				{
+					if($page==$t) {$selected='selected';}
+					else {$selected='';}
+					echo "<option value='".$t."' ".$selected.">".$t."</option>";
+				}
+				echo "</select>";	
+		   echo '</td>';
+	   echo '</tr>';
+	   echo '<tr>';
+			echo '<td height="5px"></td>';
+	   echo '</tr>';
+	}
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getRequiredIcon()
+{
+	$text = '<span class="required_icon">*</span>';
+	
+	return $text;
+}
+
+function getSQLMessage($action,$sql_value,$display_name)
+{
+	if($action=="Add")
+	{
+		if($sql_value==0)
+		{
+			$text = $display_name." has not been added.";	
+		}
+		else
+		{
+			$text = $display_name." has been added successfully.";	
+		}
+	}
+	
+	if($action=="Update")
+	{
+		if($sql_value==0)
+		{
+			$text = $display_name." data has been updated without changes.";
+		}
+		else
+		{
+			$text = $display_name." data has been updated successfully.";
+		}
+	}
+	
+	if($action=="Status")
+	{
+		if($sql_value==0)
+		{
+			$text = $display_name." status has been updated without changes.";
+		}
+		else
+		{
+			$text = $display_name." status has been updated successfully.";
+		}
+	}
+	
+	if($action=="Delete")
+	{
+		if($sql_value==0)
+		{
+			$text = $display_name." has not been deleted.";	
+		}
+		else
+		{
+			$text = $display_name." has been deleted successfully.";	
+		}
+	}
+	
+	if($action=="Send")
+	{
+		if($sql_value==0)
+		{
+			$text = "E-mail is not sent.";	
+		}
+		else
+		{
+			$text = "E-mail is sent.";	
+		}
+	}
+	
+	return $text;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getFrontActionLink($pagename,$display_name="",$class="",$id_name="",$id="",$title="",$extra="")
+{
+
+	if(SITE_URL_REWRITE!='On')
+	{ 
+		################ For PHP Link Setting ##########################
+		if(!empty($id))
+		{
+			$getid='&'.$id_name.'='.$id;
+		}
+		
+		$link='<a href="'.FRT_FOLDER_WWW.FRT_INDEX_PARAMETER.$pagename.$getid.'" class="'.$class.'" title="'.$title.'" '.$extra.'><span>'.$display_name.'</span></a>';
+		
+	}
+	else
+	{  
+		if(!empty($id))
+		{
+			$getid='&'.$id_name.'='.$id;
+		}
+	   	$link='<a href="'.FRT_FOLDER_WWW.$pagename.$getid.'" class="'.$class.'" title="'.$title.'"'.$extra.'><span>'.$display_name.'</span></a>';
+       
+	}
+	##################################################################
+	
+	return $link;	
+}
+
+function getFrontURL($pagename,$extra="")
+{
+	if(SITE_URL_REWRITE!='On')
+	{
+		 
+		################ For PHP Link Setting(Like onmouse over event etc.)##############
+		$link=FRT_FOLDER_WWW.FRT_INDEX_PARAMETER.$pagename.$extra;
+	}
+	else
+	{
+		
+		
+		$link=FRT_FOLDER_WWW.'en/'.$pagename.$extra;
+		//$link=FRT_FOLDER_WWW.$pagename.$extra;
+		################ For HTML Link Setting (htaccess)##########################
+	
+		/*if($_SESSION['frt_language_prefix'] == FRT_ENGLISH_PREFIX)
+		{
+			$language_prefix = FRT_ENGLISH_PREFIX;
+			$language_folder = FRT_ENGLISH_FOLDER;
+		}
+		else
+		{
+			$language_prefix = FRT_DUTCH_PREFIX;
+			$language_folder = FRT_DUTCH_FOLDER;
+		}*/
+		
+		/*$newname = explode(".",$pagename);
+		
+		global $db;
+		
+		$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0 ";
+		$query .=" and fmnu_filename".$language_prefix."='".$newname[0]."'";
+		$res_data = $db->select($query);
+		
+		$newpagename = FRT_FOLDER_WWW.$language_folder.$res_data[0]['fmnu_htaccess_name'.$language_prefix];
+		$newpagename = $newname[0];
+		
+		$link=FRT_FOLDER_WWW.$language_folder.$newpagename;*/
+		##################################################################
+	}
+	return $link;		
+}
+
+function getFrontMiddleURL($pagename,$extra="")
+{
+	$link = FRT_MIDD_WWW.$pagename.$extra;
+	
+	return $link;	
+}
+
+function getOnePageInManyPage($pagename,$htacessname="",$extra="")
+{
+	if(SITE_URL_REWRITE!='On')
+	{
+		################ For PHP Link Setting(Like onmouse over event etc.)##############	
+		$link=FRT_FOLDER_WWW.FRT_INDEX_PARAMETER.$pagename.$extra;
+	}
+	else
+	{
+		$link=FRT_FOLDER_WWW.$htacessname.$extra;
+	}
+	
+	return $link;	
+}
+
+function getAdminDeleteLink($tableName,$fieldPrefix,$fieldwhere,$displayName,$xtraCondition='')
+{
+	$link='<a href="javascript:;" onClick="getAjaxDeleteAction(\''.$tableName.'\',\''.$fieldPrefix.'\',\''.$fieldwhere.'\',\''.$displayName.'\',\''.$xtraCondition.'\');">Delete</a>';
+	
+	return $link;	
+}
+
+function getAdminActionLink($pagename,$language_prefix,$action,$id_name,$id,$display_name="",$xtra="")
+{
+	if(!empty($id))
+	{
+		$getid='&'.$id_name.'='.$id;
+	}
+	
+	if($display_name=="Active")
+	{
+		$status='&status=Inactive';
+	}
+	else if($display_name=="Inactive")
+	{
+		$status="&status=Active";
+	}
+	
+	if($display_name=="Header")
+	{
+		$status='&location=Footer';
+	}
+	else if($display_name=="Footer")
+	{
+		$status="&location=Header";
+	}
+	
+	
+	if($display_name=="")
+	{
+		$display_name=$action;
+	}
+	
+	if($action=="Images")
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&method='.$action.$getid.$status.$xtra.'">'.$display_name.'</a>';
+		/*.'&language_prefix='.$language_prefix*/
+	}
+	else if($action=="Delete")
+	{
+		//$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&method='.$action.$getid.$status.$xtra.'" onClick="return confirm(\'Are you sure want to delete?\');">'.$display_name.'</a>';
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&language_prefix='.$language_prefix.'&method='.$action.$getid.$status.$xtra.'" onClick="return confirm(\'Are you sure want to delete?\');"><img src="'.ADM_IMAGES_WWW.'delete.gif" alt="Delete" title="Delete" border=0></a>';
+		/*.'&language_prefix='.$language_prefix*/
+	}
+	else if($action=="Edit")
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&language_prefix='.$language_prefix.'&method='.$action.$getid.$status.$xtra.'"><img src="'.ADM_IMAGES_WWW.'edit.png" alt="Edit" title="Edit" border=0></a>';
+	}
+	else if($action=="EditModule")
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'"><img src="'.ADM_IMAGES_WWW.'edit.png" alt="Edit" title="Edit" border=0></a>';
+	}
+	else if($display_name=="Active")
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&method='.$action.$getid.$status.$xtra.'"><img src="'.ADM_IMAGES_WWW.'active_status.png" alt="Active" title="Active" border=0></a>';
+	}
+	else if($display_name=="Inactive")
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&method='.$action.$getid.$status.$xtra.'"><img src="'.ADM_IMAGES_WWW.'inactive.png" alt="Inactive" title="Inactive"  border=0></a>';
+	}
+	else
+	{
+		$link='<a href="'.ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename.'&method='.$action.$getid.$status.$xtra.'">'.$display_name.'</a>';
+		
+		
+		/*.'&language_prefix='.$language_prefix*/
+	}
+	return $link;	
+}
+
+function getAdminURL($pagename,$language_prefix="",$action="",$select_id="")
+{
+	$URL = ADM_FOLDER_WWW.ADM_INDEX_PARAMETER.$pagename;
+	
+	/*if(isset($language_prefix))
+	{
+		$URL .= "&language_prefix=".$language_prefix;
+	}*/
+	if(!empty($action))
+	{
+		$URL .= "&method=".$action;
+	}
+	if(!empty($select_id))
+	{
+		$URL .= "&".$select_id;
+	}
+	
+	return $URL;
+}
+
+function getAdminMiddleURL($pagename,$language_prefix="",$extra="")
+{
+	$URL = ADM_FOLDER_WWW.$pagename.$extra;
+	/*if(isset($language_prefix))
+	{
+		$URL .= "&language_prefix=".$language_prefix;
+	}*/
+	
+	return $URL;	
+}
+###############################################################################################################################
+
+
+###############################################################################################################################
+function getFrontTopMainMenu()
+{
+	//echo "hiiiiiiiiiiiiiiiiiiiiiii".$language_prefix;
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0 ";
+	$query .=" and fmnu_pid = '0'";
+	$query .=" and fmnu_display ='1'";
+	$query .=" and (fmnu_display_type ='both' or fmnu_display_type ='top')";
+	//$query .=" ORDER BY fmnu_id";
+    $query .=" ORDER BY fmnu_sort_order ";
+	return $query;
+} 
+function getFrontTopMainMenuFr()
+{
+	//echo "hiiiiiiiiiiiiiiiiiiiiiii".$language_prefix;
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0 ";
+	$query .=" and fmnu_pid = '0'";
+	$query .=" and fmnu_display ='1'";
+	$query .=" and (fmnu_display_type ='both' or fmnu_display_type ='top')";
+	$query .=" and fmnu_title_fr !='' ";
+	//$query .=" ORDER BY fmnu_id";
+    $query .=" ORDER BY fmnu_sort_order ";
+	return $query;
+}
+
+function getFrontTopSubMenu($main_menu_id="")
+{
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0";
+	$query .=" and fmnu_pid!='0'";
+	$query .=" and fmnu_pid ='".$main_menu_id."'";	
+	$query .=" and fmnu_display 	='1'";
+	$query .=" and (fmnu_display_type 	='both' or fmnu_display_type 	='top')";
+	$query .=" ORDER BY fmnu_id";
+    //echo   $query;
+	return $query;
+}
+
+function getFrontFooterMenu()
+{
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0 ";
+	$query .=" and fmnu_pid = '0'";
+	$query .=" and fmnu_display 	='1'";
+	$query .=" and (fmnu_display_type 	='both' or fmnu_display_type 	='footer')";
+	$query .=" ORDER BY fmnu_sort_order";
+	
+	return $query;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function getPageName($filename,$field_prefix,$language_prefix="")
+{
+	/*if($language_prefix == FRT_ENGLISH_PREFIX)
+	{
+		$language_prefix = FRT_DUTCH_PREFIX;
+	}
+	else
+	{
+		$language_prefix = FRT_ENGLISH_PREFIX;
+	}*/
+	
+	$newFileName = explode(".",$filename);
+	$newname = $newFileName[0];
+	
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE ".$field_prefix."id!=0 ";
+	$query .=" and ".$field_prefix."filename".$language_prefix."='".$newname."'";
+	$query .=" and ".$field_prefix."status='Active'";
+	
+	return $query;
+}
+
+function getPageNameLanguage($filename,$language_prefix="")
+{
+	
+	if($language_prefix == FRT_DUTCH_PREFIX)
+	{
+		$language_prefix = FRT_DUTCH_PREFIX;
+	}
+	else if($language_prefix == FRT_FRENCH_PREFIX)
+	{
+		$language_prefix = FRT_FRENCH_PREFIX;
+	}
+	else
+	{
+		$language_prefix = FRT_ENGLISH_PREFIX;
+	}	
+	$newFileName = explode(".",$filename);
+	$newname = $newFileName[0];
+	
+	$query = "SELECT * FROM " .TBL_FRONT_MENU." WHERE fmnu_id!=0 ";
+	$query .=" and ".$field_prefix."fmnu_page".$language_prefix."='".$newname."'";
+	$query .=" and fmnu_status='Active'";
+	
+	return $query;
+}
+function getInnerPageName($filename,$language_prefix="")
+{	
+	if($language_prefix == FRT_ENGLISH_PREFIX)
+	{
+		$language_prefix = FRT_DUTCH_PREFIX;
+	}
+	else
+	{
+		$language_prefix = FRT_ENGLISH_PREFIX;
+	}
+	
+	$newFileName = explode(".",$filename);
+	$newname = $newFileName[0];
+	$query = "SELECT * FROM " .TBL_LINK_PAGE_NAME." WHERE link_id!=0 ";
+	$query .=" and link_name".$language_prefix."='".$newname."'";
+	return $query;
+}
+
+function getFrontPageTitle($filename,$field_prefix)
+{
+	global $db;
+	
+	if(!empty($filename))
+	{	
+		/*if($_SESSION['frt_language_prefix'] == FRT_ENGLISH_PREFIX)
+		{
+			$language_prefix = FRT_DUTCH_PREFIX;
+		}
+		else
+		{
+			$language_prefix = FRT_ENGLISH_PREFIX;
+		}*/
+
+		$getname = getPageName($filename,$field_prefix,$language_prefix);
+
+		$res_data = $db->select($getname,2);
+		
+		if(count($res_data) > 0)
+		{
+			if($_SESSION['frt_language_prefix'] == FRT_DUTCH_PREFIX)		
+			{
+				$pageTitle = $res_data[0]['page_title_du'];
+				
+			}
+			else
+			{
+				$pageTitle = $res_data[0]['page_title'];				
+			}
+		}		
+	}
+	return $pageTitle;
+}
+function getFrontHeadingTitle($filename,$field_prefix)
+{
+	global $db;
+	
+	if(!empty($filename))
+	{	
+		/*if($_SESSION['frt_language_prefix'] == FRT_ENGLISH_PREFIX)
+		{
+			$language_prefix = FRT_DUTCH_PREFIX;
+		}
+		else
+		{
+			$language_prefix = FRT_ENGLISH_PREFIX;
+		}*/
+		
+		$getname = getPageName($filename,$field_prefix,$language_prefix);
+		$res_data = $db->select($getname,2);
+		
+		if(count($res_data) > 0)
+		{
+			if($_SESSION['frt_language_prefix'] == FRT_DUTCH_PREFIX)		
+			{
+				$headingTitle = $res_data[0]['heading_title_du'];
+				
+			}
+			else
+			{
+				$headingTitle = $res_data[0]['heading_title'];				
+			}
+		}		
+	}
+	return $headingTitle;
+}
+function getFrontPageBreadcrumbs($filename,$field_prefix)
+{
+	global $db;
+	
+	if(!empty($filename))
+	{	
+		/*if($_SESSION['frt_language_prefix'] == FRT_ENGLISH_PREFIX)
+		{
+			$language_prefix = FRT_DUTCH_PREFIX;
+		}
+		else
+		{
+			$language_prefix = FRT_ENGLISH_PREFIX;
+		}*/
+		
+		$getname = getPageName($filename,$field_prefix,$language_prefix);
+		$res_data = $db->select($getname,2);
+		if(count($res_data) > 0)
+		{
+			if($_SESSION['frt_language_prefix'] == FRT_DUTCH_PREFIX)		
+			{
+				$breadcrumbs = $res_data[0]['breadcrumbs_du'];
+				
+			}
+			else
+			{
+				$breadcrumbs = $res_data[0]['breadcrumbs'];				
+			}
+		}
+	}
+	return $breadcrumbs;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function replaceHtaccessParameter($parameter)
+{
+	$replace = str_replace(" ","-",strtolower($parameter));
+	$replace = str_replace("/","-",$replace);
+	
+	return $replace;
+}
+function getReplaceDatabaseTitleField($fieldname)
+{
+	$replaceTitle = "REPLACE(LOWER(REPLACE(".$fieldname.",' ','-')),'/','-')";
+	
+	return $replaceTitle;
+}
+################################################################################################################################
+
+
+################################################################################################################################
+function deleteUploadImage($image_name,$section_name,$extra="")
+{
+	if($section_name=='News')
+	{
+		$upload_path=NEWS_IMG_UPLOAD;
+        $org_img_prefix=NEWS_IMG_ORG_PREFIX;
+		$th_img_prefix=NEWS_IMG_TH_PREFIX;
+	}	
+	if($section_name=='Portfolio')
+    {
+        $upload_path=PORFOLIO_THUMBNAIL_IMG_UPLOAD;
+    	$org_img_prefix=PORFOLIO_IMG_ORG_PREFIX;
+    	$th_img_prefix=PORFOLIO_IMG_TH_PREFIX;
+    }
+	if($section_name=="Portfolio_image") {
+		$upload_path=PORFOLIO_IMG_UPLOAD;
+    	$org_img_prefix=PORFOLIO_IMG_ORG_PREFIX;
+    	$th_img_prefix=PORFOLIO_IMG_TH_PREFIX;
+	}
+	//echo "===>".$upload_path.$org_img_prefix.$image_name;
+     //exit;
+	if(file_exists($upload_path.$org_img_prefix.$image_name))
+	{
+        
+        unlink($upload_path.$org_img_prefix.$image_name);
+	}
+	if(file_exists($upload_path.$th_img_prefix.$image_name))
+	{
+		unlink($upload_path.$th_img_prefix.$image_name);
+	}
+}
+
+function deleteUploadFiles($files_name,$section_name,$extra="")
+{
+	if($section_name=='Aanbod')
+	{
+		$upload_path=AANBOD_PDF_UPLOAD;
+	}
+    if($section_name=='Duurzaam')
+    {
+        $upload_path=DUURZAAM_PIC_UPLOAD;
+    }
+    if($section_name=='News')
+	{
+		$upload_path=NEWS_IMG_UPLOAD;
+	}
+	if($section_name=='Prijzen')
+	{
+		$upload_path=PRIJZEN_PDF_UPLOAD;
+	}
+    if($section_name=='Architectuur')
+	{
+		$upload_path=ARCHITEC_PDF_UPLOAD;
+	}
+    //echo  $upload_path.$files_name;
+
+	if(file_exists($upload_path.$files_name))
+	{
+		$res = unlink($upload_path.$files_name);
+	}
+}
+
+function displayUploadImage($image_name,$section_name,$extra="")
+{
+   
+    if(!empty($image_name))
+   {
+   	if($section_name=='View Image')
+		{
+			$display_path=FRT_IMAGES_WWW;
+		}
+		
+		if($section_name=='News')
+		{
+			$display_path=NEWS_IMG_DISPLAY;
+		}
+		if($section_name=='Admin Theme')
+		{
+			$display_path=ADM_IMAGES_WWW;
+			
+		}
+		if($section_name=='Admin Logo')
+		{
+			$display_path=ADM_IMAGES_WWW;
+			
+		}
+		if($section_name=='User Theme')
+		{
+			 $display_path=FRT_IMAGES_WWW;
+			
+		}
+		if($section_name=='Page')
+		{
+			 $display_path=BANNER_IMG_DISPLAY;
+			
+		}
+		
+		
+			
+		//echo $display_path.$image_name;
+		$img_content='<a class="thickbox" href="'.$display_path.$image_name.'">View Image</a>&nbsp;<font color="#000000">';
+		//$img_content='<a class="thickbox" href="'.$display_path.$org_img_prefix.$image_name.'">View Original Image</a>&nbsp;<font color="#000000">|</font>&nbsp;<a class="thickbox" href="'.$display_path.$th_img_prefix.$image_name.'">View Thumbnail Image</a>';
+	}
+	else
+	{
+		$img_content='';
+	}
+
+	return $img_content;
+}
+
+function displayUploadFiles($pdf_name,$section_name,$extra="")
+{
+
+   if(!empty($pdf_name))
+   {
+		if($section_name=='Aanbod')	{
+				$display_path=AANBOD_PDF_DISPLAY;
+		}
+        if($section_name=='Duurzaam')	{
+				$display_path=DUURZAAM_PDF_DISPLAY;
+		}
+		if($section_name=='Status') {
+			$display_path=PRIJZEN_PDF_DISPLAY;
+		}
+        if($section_name=='News')   {
+			$display_path=NEWS_ARTICLE_DISPLAY;
+			//$org_img_prefix=NEWS_IMG_ORG_PREFIX;
+			//$th_img_prefix=NEWS_IMG_TH_PREFIX;
+		}
+         if($section_name=='Architectuur')   {
+			$display_path=ARCHITEC_PDF_DISPLAY ;
+			//$org_img_prefix=NEWS_IMG_ORG_PREFIX;
+			//$th_img_prefix=NEWS_IMG_TH_PREFIX;
+		}
+		if($section_name=='Prijzen') {
+			$display_path=PRIJZEN_PDF_DISPLAY;
+		}
+		$pdf_content='<a href="'.$display_path.$pdf_name.'" target="_blank">View PDF</a>';
+	}
+	else
+	{
+		$pdf_content='';
+	}
+	
+	return $pdf_content;
+}
+
+function deleteUploadFile($file_name,$section_name)
+{
+	if($section_name=='Download')
+	{
+		$upload_path=DOWNLOAD_FILE_UPLOAD;
+	}
+	
+	if(file_exists($upload_path.$file_name))
+	{
+		unlink($upload_path.$file_name);
+	}
+}
+function displayUploadFile($file_name,$section_name)
+{
+   if(!empty($file_name))
+   {
+		if($section_name=='Download')
+		{
+			$display_path=DOWNLOAD_FILE_DISPLAY;
+		}
+		
+		if(file_exists(DOWNLOAD_FILE_UPLOAD.$file_name))
+		{
+			$file_content='<a href="'.$display_path.$file_name.'" target="_blank">View</a>';
+		}
+	}
+	else
+	{
+		$file_content='';
+	}
+	
+	return $file_content;
+}
+
+function displayStatusSection($status,$action="")
+{
+	if($status=="Active")
+	{ 
+		$active="checked";
+	}
+	if($status=="Inactive")
+	{ 
+		$inactive="checked";
+	}
+	$status_content='<table width="218" border="0" cellpadding="0" cellspacing="0" align="left">
+						<tr>
+						  <td width="20" align="left"><input type="radio" name="status" align="left" value="Active" '.$active.'/></td>
+						  <td width="46" align="left">Active</td>
+						  <td width="20" align="left"><input type="radio" name="status" align="left" value="Inactive" '.$inactive.' /></td>
+						  <td width="106" align="left">Inactive</td>
+						</tr>
+					</table>';
+					
+	return $status_content;
+}
+
+function displayTemplateSection($status,$action="")
+{
+	if($status=="Banner")
+	{ 
+		$active="checked";
+	}
+	if($status=="Slider")
+	{ 
+		$inactive="checked";
+	}
+	$status_content='<table width="218" border="0" cellpadding="0" cellspacing="0" align="left">
+						<tr>
+						  <td width="20" align="left"><input type="radio" name="ttype" align="left" value="Banner" '.$active.'/></td>
+						  <td width="46" align="left">Banner</td>
+						  <td width="20" align="left"><input type="radio" name="ttype" align="left" value="Slider" '.$inactive.' /></td>
+						  <td width="106" align="left">Slider</td>
+						</tr>
+					</table>';
+					
+	return $status_content;
+}
+
+################################################################################################################################
+
+
+################################################################################################################################
+function getAdminLevelCombo($adm_level="")
+{
+	?>
+	<select name="adm_level" id="adm_level">
+		<option value="0">--Select--</option>
+		<option value="Master" <?=($adm_level == "Master")?'selected="selected"':'';?>>Master</option>
+		<option value="Maintenance" <?=($adm_level == "Maintenance")?'selected="selected"':'';?>>Maintenance</option>
+	</select>
+	<?php
+}
+
+function getCategoryList($name="",$id="",$value="",$default_name="--Select Category--",$style="")
+{
+	global $db;
+	$query = "SELECT * FROM ".TBL_CATEGORY." 
+			  WHERE cat_status='Active' AND cat_parent_id = '0' AND cat_id != '0'";
+	$data = $db->select($query);	
+	
+	$categoryCombo = '';
+		$categoryCombo .= '<select name="'.$name.'" id="'.$id.'" class="'.$class.'" style="'.$style.'" onchange="getSubcat(this.value)">';
+		$categoryCombo .= '<option value="0">'.$default_name.'</option>';
+	
+	for($i=0;$i<count($data);$i++)
+	{		
+		$categoryCombo .= '<option value="'.$data[$i]["cat_id"].'"'; 
+		if($value == $data[$i]["cat_id"])
+		{
+			$categoryCombo .='selected="selected"';
+		}
+		$categoryCombo .='>'.$data[$i]["cat_name"].'</option>';
+
+	}
+	$categoryCombo .='</select>';
+	
+	return $categoryCombo;
+}
+
+function getSectorList($name="",$id="",$value="",$default_name="--Select Sector--",$style="",$extra="")
+{
+	global $db;
+	$query = "SELECT * FROM ".TBL_SECTOR." 
+			  WHERE sec_id != '0'";
+	$data = $db->select($query);	
+	
+	$sectorCombo = '';
+		$sectorCombo .= '<select name="'.$name.'" id="'.$id.'" class="'.$class.'" style="'.$style.'"  '.$extra.'>';
+		$sectorCombo .= '<option value="0">'.$default_name.'</option>';
+	
+	for($i=0;$i<count($data);$i++)
+	{		
+		$sectorCombo .= '<option value="'.$data[$i]["sec_id"].'"'; 
+		if($value == $data[$i]["sec_id"])
+		{
+			$sectorCombo .='selected="selected"';
+		}
+		$sectorCombo .='>'.$data[$i]["sec_title"].'</option>';
+		
+	}
+	$sectorCombo .='</select>';
+	
+	return $sectorCombo;
+}
+
+
+function getProjectList($name="",$id="",$value="",$default_name="--Select Category--",$style="",$extra="")
+{
+	global $db;
+	$query = "SELECT * FROM ".TBL_PORTFOLIO."
+			  WHERE port_status='Active' AND port_id != '0' ORDER BY port_client_name";
+	$data = $db->select($query);	
+	
+	$projCombo = '';
+		$projCombo .= '<select name="'.$name.'" id="'.$id.'" class="'.$class.'" style="'.$style.'" >';
+		$projCombo .= '<option value="0">'.$default_name.'</option>';
+	
+	for($i=0;$i<count($data);$i++)
+	{		
+		$projCombo .= '<option value="'.$data[$i]["port_id"].'"'; 
+		if($value == $data[$i]["port_id"])
+		{
+			$projCombo .='selected="selected"';
+		}
+		$projCombo .='>'.$data[$i]["port_client_name"].'</option>';
+		
+	}
+	$projCombo .='</select>';
+	
+	return $projCombo;
+}
+
+function getProjectChoices($name="",$id="",$value="",$default_name="--Select--",$class="",$style="")
+{
+
+?>
+	<?php /*?><select name="<?=$name?>" id="<?=$id?>" class="<?=$class?>" >
+		<option value="0"><?=$default_name?></option>
+		<option value="In uitvoering" <?=("In uitvoering" == $value)?'selected="selected':'';?>>In uitvoering</option>
+		<option value="In voorbereiding" <?=("In voorbereiding" == $value)?'selected="selected':'';?>>In voorbereiding</option>
+		<option value="Gerealiseerd" <?=("Gerealiseerd" == $value)?'selected="selected':'';?>>Gerealiseerd</option><?php */?>
+<?php	
+	return; 
+}
+
+
+################################################################################################################################
+
+
+################################################################################################################################
+function getSelectList($table_name,$field_prefix,$auto_id="",$status="",$xtra_subquery="")
+{
+	$query = "SELECT * ";
+	if(!empty($xtra_subquery))
+	{
+		$query .=",".$xtra_subquery;
+	}
+	$query .=" FROM " .$table_name; 
+	$query .=" WHERE ".$field_prefix."id!=0 ";
+	if(!empty($auto_id))
+	{
+		$query .= " AND ".$field_prefix."id ='".$auto_id."'";
+	}
+	if(!empty($status))
+	{
+		$query .= " AND ".$field_prefix."status ='".$status."'";
+	}   
+	return $query;
+}
+
+function getViewUserList($adm_id="")
+{
+	$query = "SELECT * from " .TBL_ADMIN_USER." where adm_id!=0 ";
+	if(!empty($adm_id))
+	{
+		$query .= " and adm_id = '".$adm_id."'";
+	}
+	return $query;
+}
+
+function getContactListWithSupplier()
+{
+	$sql_query = "SELECT sup.sup_fname,con.* 
+				FROM ".TBL_CONTACT_US." con 	  
+				LEFT JOIN ".TBL_SUPPLIER_LEADS." as supled ON (con.con_id = supled.led_con_id)	 
+				LEFT JOIN ".TBL_SUPPLIER." as sup ON (sup.sup_id = supled.led_sup_id)
+				WHERE con.con_id != 0 ";
+				
+	return $sql_query;			
+}
+
+################################################################################################################################
+
+function getProductForMail($product)
+{
+	
+	global $db;
+	$proDiv = '';
+	for($i=0;$i<count($product);$i++)
+	{
+		$subpro = explode("_",$product[$i]);
+		$r[$subpro[0]][] = $subpro[1];
+	}
+	$proDiv .='<div>';
+	foreach($r as $key => $val)
+	{
+		$sqlCat = getSelectList(TBL_CATEGORY,"cat_",$auto_id=$key,"Active");
+		$resCat = $db->select($sqlCat);
+		
+		$proDiv .='<div class="contact-text">'.$resCat[0]["cat_name"].'</div>';
+		for($i=0;$i<count($r[$key]);$i++)
+		{
+			$sqlSubCat = getSelectList(TBL_CATEGORY,"cat_",$auto_id=$r[$key][$i],"Active");
+			$sqlSubCat .=" AND cat_parent_id = '".$key."'";
+			$resSubCat = $db->select($sqlSubCat);
+			$proDiv .='<div style="margin-left:16px;">'.$resSubCat[0]["cat_name"].'</div>';
+		}
+	}
+	$proDiv .='</div>';
+	return $proDiv;
+}
+
+function checkValueExist($table,$field_prefix,$field_name,$field_value,$id="")
+{
+	global $db;
+
+	$sql_query = getSelectList($table,$field_prefix);
+	$sql_query .=" AND ".$field_prefix.$field_name." = '".$field_value."'";
+	
+	if(!empty($id))
+	{
+		$sql_query .=" AND ".$field_prefix."id != '".$id."'";
+	}
+	$sql_query .=
+
+	$resValue = $db->select($sql_query);
+	if(count($resValue) > 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+function checkedRadio($value1,$value2,$defult="")
+{
+
+	if(!empty($value1))
+	{
+		if($value1 == $value2)
+		{
+			$checked = 'checked="checked"';
+		}
+	}
+	else if($defult == "1")
+	{
+		$checked = 'checked="checked"';
+	}
+	else
+	{
+		$checked = '';
+	}
+	return $checked;
+}
+
+function displayDefultValInlisting($value,$defultvalue="N/A",$chkVal="")
+{
+	if(!empty($value))
+	{
+		$defult = $value;
+	}
+	else if($chkVal == $value)
+	{
+		$defult = $defultvalue;
+	}
+	else
+	{
+		$defult = $defultvalue;
+	}
+	return $defult;
+}
+
+function implodeArry($arrVal,$explodeval)
+{
+	if(!empty($arrVal) && $arrVal > 1)
+	{
+		$implodeVal = implode($explodeval,$arrVal);
+	}
+	else
+	{
+		$implodeVal = $arrVal;
+	}
+	return $implodeVal;
+}
+
+function getAssignSupplierList($con_id,$implodeSign=",")
+{
+	global $db;
+
+	$extra = "(SELECT sup_fname 
+				FROM ".TBL_SUPPLIER." as sup
+				WHERE sup_id = led_sup_id) as supName";
+	$sql_query = getSelectList(TBL_SUPPLIER_LEADS,"led_",'','',$extra);
+	$sql_query .=" AND led_con_id = '".$con_id."' AND led_status = 'Active'";
+	
+	$resSupp = $db->select($sql_query);
+	
+	for($i=0;$i<count($resSupp);$i++)
+	{
+		$arr[] = $resSupp[$i]["supName"];
+	}
+	if(count($resSupp) > 0)
+	{
+		if(!empty($arr) && count($arr) > 1)
+		{
+			$suppname = implodeArry($arr,$implodeSign);
+		}
+		else
+		{
+			$suppname = $arr[0];
+		}
+	}
+	else
+	{
+		$suppname = "N/A";
+	}
+	return $suppname;
+}
+
+
+function getSimpleTopMenu($language_prefix)
+{
+
+	
+    global $db;
+	if($language_prefix != '_fr')
+	{
+		$list_menu_query            = getFrontTopMainMenu();
+	}
+	else
+	{
+		$list_menu_query            = getFrontTopMainMenuFr();
+	}
+	$result_menu_query          = $db->select($list_menu_query);
+    $total_menu_rows            = count($result_menu_query);
+	
+	//echo "hi".$language_prefix;
+	/**************About vinix sub menu  *************/
+	$list_menu_query2 .= "SELECT * FROM ".TBL_FRONT_MENU." WHERE fmnu_display_type = 'other' AND fmnu_display = '1' AND fmnu_status = 'Active' AND fmnu_pid=2";
+    $result_menu_query2 = $db->select($list_menu_query2);
+	$array2 = array();	
+	if($result_menu_query2!="") {
+		$j=1;
+		foreach($result_menu_query2 as $resultMenuQuery2Data)  {				
+			if($j==1){			
+				$array2 = array($resultMenuQuery2Data['fmnu_htaccess'.$language_prefix],'function');
+			} else {
+				$arrayVal = $resultMenuQuery2Data['fmnu_htaccess'.$language_prefix];
+				$array3 = array_push($array2,$arrayVal);
+			}
+			$j++;
+		}
+		$aboutVinixArray = $array2;
+		array_push($aboutVinixArray,"jan-moeremans","vincent-rotthier");
+		
+	}
+	/**************End About vinix sub menu  *************/
+	
+	/**************Service sub menu  *************/
+	$list_menu_query3 .= "SELECT * FROM ".TBL_FRONT_MENU." WHERE fmnu_display_type = 'other' AND fmnu_display = '1' AND fmnu_status = 'Active' AND fmnu_pid=3";
+    $result_menu_query3 = $db->select($list_menu_query3);
+	$arraySer2 = array();	
+	if($result_menu_query3!="") {
+		$i=1;
+		foreach($result_menu_query3 as $resultMenuQuery3Data)  {				
+			if($i==1){			
+				$arraySer2 = array($resultMenuQuery3Data['fmnu_htaccess'.$language_prefix]);
+			} else {
+				$arraySerVal = $resultMenuQuery3Data['fmnu_htaccess'.$language_prefix];
+				$arraySer3 = array_push($arraySer2,$arraySerVal);
+			}
+			$i++;
+		}
+		$serviceArray = $arraySer3;		
+	}
+	/**************End service sub menu  *************/
+	
+	if($total_menu_rows>0) {			
+		
+		$menuTop .='<ul>';
+		 for($i=0;$i<$total_menu_rows;$i++) {
+				if(SITE_URL_REWRITE == "On") {
+				   	$link = $result_menu_query[$i]["fmnu_htaccess".$language_prefix];                    
+				} else {
+					$link = $result_menu_query[$i]["fmnu_page".$language_prefix];                    
+				}
+				$display_name = strtoupper($result_menu_query[$i]["fmnu_title".$language_prefix]);
+				 $link2 = $result_menu_query[$i]["fmnu_page".$language_prefix];
+				$width = $result_menu_query[$i]["fmnu_width"];
+                
+				if(empty($_REQUEST['files'])) {
+					if($link2 == "home"){						
+						$class = 'act';
+					} else {
+						$class = '';
+					}
+				} 
+				else if($_REQUEST['files'] == $link2 && !empty($_REQUEST['files'])){
+                    $class = 'act';
+				}
+				else {
+					$class = '';
+				}
+               if(in_array($_REQUEST['files'],$aboutVinixArray)) {
+                   if($link == "about-vinix"){
+                        $class = 'act';
+                   }else{
+                         $extra = '';
+                   }
+                }
+				 if($_REQUEST['files']=='form') {
+                   if($link == "contact"){
+                        $class = 'act';
+                   }else{
+                         $extra = '';
+                   }
+                }
+				
+				else if($_REQUEST['files'] == 'approach' || $_REQUEST['files'] == 'content-management-system-cms' || $_REQUEST['files'] == 'search-engine-optimization-seo') {
+                   if($link == "services"){
+                        $class = 'act';
+                   }else{
+                         $extra = '';
+                   }
+                }
+				
+				else if(in_array($_REQUEST['files'],$arraySer2)) {
+                   if($link == "services"){
+                        $class = 'act';
+                   }else{
+                         $extra = '';
+                   }
+                }
+				else if($_REQUEST['files']=="client") {
+                   if($link == "portfolio"){
+                        $class = 'act';
+                   }else{
+                         $extra = '';
+                   }
+                }
+				
+                 if($link2 == "#contact")
+      				{
+      					
+                            $link = '#';
+      						$menuTop .='<li>';
+      						$menuTop .=getFrontActionLink($link,$display_name,'','','',$display_name,$extra);
+      						$menuTop .='</li>';
+      					
+      				} else {
+							
+                        $menuTop .='<li>';
+      					$menuTop .=getFrontActionLink($link,$display_name,$class,'','',$display_name,$extra);
+      					$menuTop .='</li>';
+      				}
+
+            }
+			$menuTop .='</ul>';
+		}
+		return $menuTop;
+}
+function getProjectMenu($proNameId)
+{
+	global $db;
+	
+	$list_menu_query .= "SELECT * FROM ".TBL_FRONT_MENU." WHERE fmnu_display_type = 'other' AND fmnu_display = '1' AND fmnu_status = 'Active' AND fmnu_pid=".$proNameId." ORDER BY fmnu_sort_order";
+    $result_menu_query  = $db->select($list_menu_query);
+	
+	$list_menu_query_main .= "SELECT * FROM ".TBL_FRONT_MENU." WHERE  fmnu_display = '1' AND fmnu_status = 'Active' AND fmnu_id=".$proNameId."";
+    $result_menu_project_query  = $db->select($list_menu_query_main);
+	$secname = $result_menu_project_query[0]['fmnu_htaccess'];
+	
+	$total_menu_rows = count($result_menu_query);	
+	if($total_menu_rows>0)
+	{
+		$menuTop .='<ul>';
+		$m=1;		
+		for($i=0;$i<$total_menu_rows;$i++)
+		{		
+			if($m%2==0){
+			$class = "left_menu_even";
+			} else {
+			$class = "left_menu_odd";
+			}
+			
+			$display_name= strtoupper($result_menu_query[$i]["fmnu_title"]);
+			if(SITE_URL_REWRITE == "On")
+			{
+				if($result_menu_query[$i]["fmnu_htaccess"] !="")
+				{
+					if(!empty($secname)) {
+						if($result_menu_query[$i]["fmnu_htaccess"]=="about-vinix"){
+							$link = $result_menu_query[$i]["fmnu_htaccess"];
+						} else {
+							
+							$link = $secname."/".$result_menu_query[$i]["fmnu_htaccess"];
+							$managementArr=array('vincent-rotthier','jan-moeremans');
+							$webdesignArr=array('approach','content-management-system-cms','search-engine-optimization-seo');
+							
+							
+							$careerArr = array('function');
+							if(in_array($_GET["files"],$managementArr)){								
+								if($result_menu_query[$i]["fmnu_htaccess"]=="management") {
+									$class = "active";
+								}
+							}
+							if(in_array($_GET["files"],$careerArr)){								
+								if($result_menu_query[$i]["fmnu_htaccess"]=="career") {
+									$class = "active";
+								}
+							}
+							if(in_array($_GET["files"],$webdesignArr)){								
+								if($result_menu_query[$i]["fmnu_htaccess"]=="web-design-and-development") {
+									$class = "active";
+								}
+							}
+							else if($result_menu_query[$i]["fmnu_htaccess"]==$_REQUEST['date']){								
+								$class = "active";
+							} else {								
+								//$class = "";	
+							}
+							
+						}
+						
+					}
+					else
+					{
+						//$link = "projecten/".$proName;
+						$link  = "";
+					}
+				}
+				$menuTop .='<li>';			
+				$menuTop .=getFrontActionLink($link,$display_name,$class,"","",$display_name);
+				$menuTop .='</li>';												  			
+				
+			}
+		$m++;	
+		}
+		$menuTop .='</ul>';
+	}
+	echo $menuTop;	
+}
+
+function getHtacesslinkName($title)
+{
+	$hts = strtolower(str_replace(" ","-",$title));
+	return $hts;
+}
+
+function getURIinProjectName()
+{
+	global $db;
+	
+	$uri = explode("/",$_SERVER["REQUEST_URI"]);
+	$tt = $uri[count($uri)-2];
+	$sql = getSelectList(TBL_PROJECT,"pro_");
+	$sql .= " AND LOWER(REPLACE(pro_title,' ','-')) = '".$tt."'";
+	$res = $db->select($sql);
+	
+	$idArr = array();
+	$idArr["sec_id"] = $res[0]["pro_sec_id"];
+	$idArr["pro_id"] = $res[0]["pro_id"];
+	
+	return $idArr;
+}
+
+function frtshowerr()
+{
+	$str = '';
+	if(!empty($_SESSION['error']))
+	{
+		$str = '<table width="100%" border="0" align="">';
+		for($i=0; $i<count($_SESSION['error']); $i++)
+		{
+			$str .= "<tr><td style='color:#E71D07'><img src='images/error.gif' border='0'> ".$_SESSION['error'][$i]."</td></tr>";
+		}
+		$str .= "</table>";
+		return $str;
+	}
+	return false;
+}
+
+function frtshowmsg()
+{
+	$str = '';
+	if(!empty($_SESSION['msg']))
+	{
+		$str = '<table width="100%" border="0" align="">';
+		for($i=0; $i<count($_SESSION['msg']); $i++)
+		{
+			$str .='<tr><td>'.$_SESSION['msg'][$i].'</td></tr>';
+		}
+		$str .= "</table>";
+		return $str;
+	}
+	return false;
+}
+
+function getPrintLinkSection($titlelink,$proName)
+{
+	if(SITE_URL_REWRITE == "On")
+	{
+		$url = "projecten/".$proName."/hou-me-op-de-hoogte";
+	}
+	else
+	{
+		$url = FRT_HOU_ME_OP_DE_HOOGTE;
+	}
+
+	$printlink = '';
+	$printlink .='<div class="sub-links-right">
+						<ul>
+							<li><a href="javascript:window.popPrint();" title="AFDRUKKEN">PROJECTFICHE AFDRUKKEN</a></li>
+							<li><a href="'.getFrontURL($url).'" title="HOU ME OP DE HOOGTE">HOU ME OP DE HOOGTE</a></li>
+						</ul>
+					</div>';
+                    //<li><a href="'.getFrontURL($url).'" title="HOU ME OP DE HOOGTE">HOU ME OP DE HOOGTE</a></li>
+	return $printlink;					
+}
+
+function formatMoney($number, $fractional=false) {
+    if ($fractional) {
+        $number = sprintf('%.2f', $number);
+    }
+    while (true) {
+        $replaced = preg_replace('/(-?\d+)(\d\d\d)/', '$1.$2', $number);
+        if ($replaced != $number) {
+            $number = $replaced;
+        } else {
+            break;
+        }
+    }
+    return $number;
+} 
+
+function setSidePanelMenu()
+{
+	global $db;
+
+	if(!empty($_GET["id"]))
+	{
+		$sql = getSelectList(TBL_PROJECT,"pro_");
+		$sql .= " AND LOWER(REPLACE(pro_title,' ','-')) = '".$_GET["id"]."'";
+		$res = $db->select($sql);
+		$pro_id = $res[0]["pro_id"];
+		$sec_id = $res[0]["pro_sec_id"];
+	}
+	else
+	{
+		$idArr = getURIinProjectName();
+		$sec_id = $idArr["sec_id"];
+		$pro_id = $idArr["pro_id"];
+	}
+
+	$sqllig = getSelectList(TBL_LIGGING,"lig_","","Active");
+	$sqllig .= " AND lig_pro_id = '".$pro_id."'";
+	$reslig = $db->select($sqllig);
+
+	$sqlAan = getSelectList(TBL_AANBOD,"aan_","","Active");
+	$sqlAan .= " AND aan_pro_id = '".$pro_id."'";
+	$resAan = $db->select($sqlAan);
+
+    $sqlPlannen = getSelectList(TBL_ARCHITECTUUR,"arc_","","Active");
+	$sqlPlannen .= " AND arc_pro_id = '".$pro_id."'";
+	$resPlannen = $db->select($sqlPlannen);
+
+    $sqlDuu = getSelectList(TBL_DUURZAAM_ONTWIKKELE,"duu_","","Active");
+	$sqlDuu .= " AND duu_pro_id = '".$pro_id."'";
+	$resDuu = $db->select($sqlDuu);
+	
+	$sqlFoto = getSelectList(TBL_FOTO,"fot_","","Active");
+	$sqlFoto .= " AND fot_pro_id = '".$pro_id."'";
+	$resFoto = $db->select($sqlFoto);
+
+    $sqlCon = getSelectList(TBL_CONTACT,"con_","","Active");
+	$sqlCon .= " AND con_pro_id = '".$pro_id."'";
+	$resCon = $db->select($sqlCon);
+
+
+	if(empty($reslig))
+	{
+		$idsArr[] = 30;
+	}
+    if(empty($resAan))
+	{
+		$idsArr[] = 31;
+	}
+    if(empty($resPlannen))
+	{
+		$idsArr[] = 32;
+	}
+     if(empty($resDuu))
+	{
+		$idsArr[] = 33;
+	}
+    if(empty($resFoto))
+	{
+		$idsArr[] = 34;
+	}
+    if(empty($resCon))
+	{
+		$idsArr[] = 35;
+	}
+	return $idsArr;
+}
+
+
+function leftDuurzaamDisply($stringRequrireId){
+  global $db;
+  $sqlDuuzaamPage = getSelectList(TBL_PAGES,"pag_","","Active");
+  $sqlDuuzaamPage .= " AND 	pag_fmid in ($stringRequrireId)";
+  $resDuuzaamPageArr = $db->select($sqlDuuzaamPage);
+  $resCount = count($resDuuzaamPageArr);
+  $htmlOutput = ' <ul class="inner-menu-right">';
+    $r=1;
+     foreach($resDuuzaamPageArr as $resDuuzaamPage)  {
+        $pagename =  $resDuuzaamPage['pag_url'];
+        if($r==$resCount){$rightLastClass = 'inner-menu-right-last';}else{$rightLastClass = '';}
+        if(SITE_URL_REWRITE!='On')  {
+    		$linkDuuzaam = FRT_FOLDER_WWW.FRT_INDEX_PARAMETER.$pagename;
+	    } else {
+           	$linkDuuzaam=FRT_FOLDER_WWW.'nl/duurzaam-ontwikkelen/'.$pagename;
+        }
+       $imagePath = PAGE_IMG_DISPLAY.$resDuuzaamPage['pag_image'];
+        $htmlOutput .= '<li class="'.$rightLastClass.'"><span>';
+        if($resDuuzaamPage['pag_image']!="") {
+            $htmlOutput .='<a href="'.$linkDuuzaam.'"><img title="'.$resDuuzaamPage['pag_title'].'" alt="'.$resDuuzaamPage['pag_title'].'" src="'.$imagePath.'" width="64px" height="61px"></a>';
+        }
+       $htmlOutput .= ' </span><a href="'.$linkDuuzaam.'" title="'.$resDuuzaamPage['pag_title'].'">'.ucfirst($resDuuzaamPage['pag_title']).'</a><br>
+        '.$resDuuzaamPage['pag_short_desc'].'<br clear="all"></li>';
+    $r++;
+    }
+     $htmlOutput .= '</ul>';
+    return $htmlOutput;
+
+}
+
+function displayError($err,$errcnt)
+{
+	if(!empty($err))
+	{
+		$display='<tr>
+					  <td class="msg_box" align="left" colspan=2>
+					  ';
+			 
+					  for($j=0;$j <$errcnt; $j++) 
+					  { 				
+						$display.='<font style=font-size:15px;font-weight:normal;color:#FF0000>'.($j+1).'.&nbsp;'.$err[$j].'</font><br/>';
+					  }
+			 		  
+			$display.='</td>
+				</tr>
+				';
+		
+		return $display;
+	} 
+}
+?>
