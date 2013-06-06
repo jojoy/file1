@@ -1,0 +1,32 @@
+<?php
+function fileUpload($tempname,$updfile,$filename)
+{
+/*echo  $tempname."–".$updfile."-".$filename;
+exit*/
+if(move_uploaded_file($tempname,$updfile.$filename))
+{
+return true;
+}
+else
+{
+return false;
+}
+}
+
+if($_REQUEST){
+print_r($_FILES);
+foreach ($_FILES['flImage']['name'] as $key => $value) {
+echo $_FILES['flImage']['name'][$key];
+$tempname = $_FILES['flImage']['tmp_name'][$key];
+$updfile = "uploads/";
+$filename = $_FILES['flImage']['name'][$key];
+
+if(fileUpload($tempname,$updfile,$filename)){
+echo "yes uploaded";
+}    else{
+echo "there's some problem dude";
+}
+}
+
+}
+?>
