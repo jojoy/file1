@@ -1,0 +1,55 @@
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript">
+
+fields1=0;
+no=11;
+function addmore() {
+if (fields1 != 5) {
+//document.getElementById('add_input').innerHTML += "<input type='file' style='margin-top:1px;' id='flImage"+no+"' name='flImage"+no+"' tabindex='3′ /><br />";
+$('#add_input').append("<input type='file' style='margin-top:1px;' id='flImage' name='flImage[]' tabindex='3′ /><br />");
+fields1 += 1;
+no+=1;
+} else {
+//document.getElementById('text').innerHTML += "<br />Only 10 upload fields allowed.";
+document.form.add.disabled=true;
+}
+}
+</script>
+<script>
+
+$(document).ready(function(){
+
+$('#submit').live('click',function(){
+var formData = new FormData($('form')[0]);
+$.ajax({
+url: 'upload1.php',  //server script to process data
+type: 'POST',
+xhr: function() {  // custom xhr
+var myXhr = $.ajaxSettings.xhr();
+
+return myXhr;
+},
+//Ajax events
+// Form data
+data: formData,
+//Options to tell JQuery not to process data or worry about content-type
+cache: false,
+contentType: false,
+processData: false
+});
+});
+
+});
+</script>
+<form enctype="multipart/form-data" >
+<div id="add_input">
+<input type='file' style='margin-top:1px;' id='flImage' name='flImage[]' tabindex='3' />
+<input type='file' style='margin-top:1px;' id='flImage' name='flImage[]' tabindex='3' />
+<input type='file' style='margin-top:1px;' id='flImage' name='flImage[]' tabindex='3' />
+<input type='file' style='margin-top:1px;' id='flImage' name='flImage[]' tabindex='3' />
+</div>
+<input type="hidden" name="fname" value=""  >
+<input type="button" name="add" value="add" onclick="return addmore();" >
+<input type="button" id="submit" name="submit" value="submit">
+</form>
